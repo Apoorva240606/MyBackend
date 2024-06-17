@@ -1,0 +1,21 @@
+{
+  "name": "backend-production",
+  "version": "1.0.0",
+  "description": "a basic backend to deploy",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "Node",
+    "Backend"
+  ],
+  "author": "Apoorva Jindal",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
