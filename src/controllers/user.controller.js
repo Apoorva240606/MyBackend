@@ -4,7 +4,6 @@ import { User } from "../models/user.models.js";
 import uploadOnCloudinary from '../utils/cloudinary.js';
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try{
@@ -177,7 +176,71 @@ const logoutUser = asyncHandler( async (req,res) => {
        ))
 
 })
-History
+
+
+const refreshAccessToken = asyncHandler( async (req,res) => {
+    const incomingRefreshToken = res.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "Unauthorized request")
+    }
+
+   try {
+    const decodedToken = await jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+ 
+    const user = await User.findById(decodedToken._id)
+ 
+     if(!user){
+         throw new ApiError(401, "Invalid RefreshToken") 
+     }
+ 
+     if(incomingRefreshToken !== user?.refreshToken) {
+         throw new ApiError(401, "RefreshToken has been expired or used") 
+     }
+ 
+     const options = {
+         httpOnly:true,
+         secure: true
+        
+     }
+ 
+    const {accessToken, newRefreshToken} = await generateAccessTokenAndRefreshToken(user._id)
+    return res.status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken",newRefreshToken,options)
+    .json(
+         new ApiResponse(200,
+             {accessToken, refreshToken: newRefreshToken},
+             "Access Token refreshed successfully"
+         )
+    )
+ 
+   } catch (error) {
+        throw new ApiError(401, "Invalid refreshToken")
+   }
+})
+
+const changeCurrentPassword = asyncHandler( async (req, res) => {
+    
+    const {oldPassword, newPassword} = req.body
+
+    const user = await User.findById(req.user?._id)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    
+    if(!isPasswordCorrect){
+        throw new ApiError(400, "Invalid password")
+    }
+    user.password = newPassword
+    await user.save({validateBeforeSave: false})
+
+    return res.status(200
+        .json(
+            new ApiResponse(200, {}, "Password changed successfully")
+        )
+    )
+    
+})
+
 
 const getCurrentUser = asyncHandler( async (req, res) => {
         return res.status(200).json(
@@ -410,6 +473,6 @@ export {
         logoutUser,
         refreshAccessToken,
         getUserChannelProfile,
-        updateCoverImage,
-        getWatchHistory
+        getWatchHistory,
+        updateCoverImage
     }
