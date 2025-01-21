@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 // down here i have replaced res with _ because we are not using it and some code migth have this syntax
 export const verifyJWT = asyncHandler(async(req, _, next) => {
     try {
+        console.log("req.cookies",req.cookies)
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
     
         if(!token) {
@@ -29,7 +30,7 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
         }
     
         req.user = user;
-        console.log("req.user",req.user)
+        
 
         next()
 
