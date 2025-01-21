@@ -1,7 +1,4 @@
 import multer from 'multer';
-//bmjngfdosmeoiewjndkcma sjfi
-
-//hsrdibnvxzfjkvbiudvgaweuihvsaduivb
 const storage = multer.diskStorage({
     destination: (req, file, cb,) => {
         cb(null, "./public");
